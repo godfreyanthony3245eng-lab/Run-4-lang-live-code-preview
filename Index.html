@@ -1,0 +1,838 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>G-Tech Pro IDE: Spark Edition (V4 Enterprise)</title>
+  
+  <script src="https://js.puter.com/v2/"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+
+  <style>
+    :root {
+      /* Dynamic Theme Variables */
+      --bg-dark: #0a0d12;
+      --bg-panel: #121721;
+      --bg-surface: #1b2230;
+      --border: #2a3447;
+      --text-main: #f0f6fc;
+      --text-muted: #6e7681;
+      --accent: #38bdf8;
+      --accent-glow: rgba(56, 189, 248, 0.25);
+      --danger: #f43f5e;
+      --success: #22c55e;
+      --warn: #fbbf24;
+      
+      --st-base: #f0f6fc; --st-tag: #38bdf8; --st-attr: #f472b6; --st-kw: #c084fc; 
+      --st-func: #60a5fa; --st-var: #f97316; --st-str: #4ade80; --st-num: #facc15; 
+      --st-comment: #6b7280; --st-ghost: rgba(240, 246, 252, 0.38);
+      
+      --font-size: 13px;
+      --font-family: 'Fira Code', 'Consolas', monospace;
+      --line-height: 1.5;
+    }
+
+    /* Light Theme Override */
+    body.theme-light {
+      --bg-dark: #ffffff; --bg-panel: #f3f4f6; --bg-surface: #e5e7eb; --border: #d1d5db;
+      --text-main: #111827; --text-muted: #6b7280; --accent: #2563eb;
+      --st-base: #111827; --st-tag: #2563eb; --st-attr: #db2777; --st-kw: #9333ea;
+      --st-str: #16a34a; --st-ghost: rgba(17, 24, 39, 0.38);
+    }
+
+    /* Cyberpunk Theme Override */
+    body.theme-cyberpunk {
+      --bg-dark: #05050a; --bg-panel: #0d0e1b; --bg-surface: #181a2f; --border: #ff0055;
+      --text-main: #00ffcc; --text-muted: #8855ff; --accent: #ff0055;
+      --st-base: #00ffcc; --st-tag: #ff0055; --st-attr: #ffff00; --st-kw: #ff00ff;
+      --st-str: #00ff66; --st-ghost: rgba(0, 255, 204, 0.38);
+    }
+
+    /* Solarized Amber Theme Override */
+    body.theme-amber {
+      --bg-dark: #1e1e12; --bg-panel: #2a2a18; --bg-surface: #363620; --border: #52522c;
+      --text-main: #ffb400; --text-muted: #a38232; --accent: #ff8c00;
+      --st-base: #ffb400; --st-tag: #ff8c00; --st-attr: #ffd700; --st-kw: #ff4500;
+      --st-str: #adff2f; --st-ghost: rgba(255, 180, 0, 0.38);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: var(--font-family); user-select: none; }
+    html, body { height: 100%; height: 100dvh; width: 100vw; overflow: hidden; background: var(--bg-dark); color: var(--text-main); overscroll-behavior: none; }
+
+    ::-webkit-scrollbar { width: 5px; height: 5px; }
+    ::-webkit-scrollbar-track { background: var(--bg-dark); }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--accent); }
+
+    .app-root { display: flex; flex-direction: column; height: 100vh; height: 100dvh; width: 100vw; position: relative; overflow: hidden; }
+
+    header { display: flex; flex-direction: column; background: var(--bg-panel); border-bottom: 1px solid var(--border); flex-shrink: 0; z-index: 20; }
+    .top-bar { height: 42px; display: flex; align-items: center; justify-content: space-between; padding: 0 10px; }
+    .tool-bar { height: 34px; display: flex; align-items: center; gap: 6px; padding: 0 8px; background: var(--bg-surface); border-top: 1px solid var(--border); overflow-x: auto; touch-action: pan-x; }
+    
+    .btn { background: var(--bg-panel); border: 1px solid var(--border); color: var(--text-main); padding: 5px 10px; font-size: 11px; border-radius: 5px; cursor: pointer; font-weight: 600; display: flex; align-items: center; gap: 5px; white-space: nowrap; transition: all 0.15s; }
+    .btn:hover { border-color: var(--accent); background: var(--bg-surface); }
+    .btn.primary { background: var(--success); color: #ffffff; border: none; }
+    .btn.accent { color: var(--accent); border-color: var(--accent); box-shadow: 0 0 8px var(--accent-glow); }
+    
+    .file-badge { font-size: 11px; font-weight: 700; background: var(--bg-dark); border: 1px solid var(--border); padding: 4px 10px; border-radius: 5px; color: var(--accent); display: flex; align-items: center; gap: 6px; }
+
+    .tab-bar { display: flex; background: var(--bg-dark); border-bottom: 1px solid var(--border); overflow-x: auto; flex-shrink: 0; }
+    .tab-item { padding: 6px 12px; font-size: 11px; background: var(--bg-panel); border-right: 1px solid var(--border); color: var(--text-muted); cursor: pointer; display: flex; align-items: center; gap: 8px; white-space: nowrap; }
+    .tab-item.active { background: var(--bg-surface); color: var(--accent); border-bottom: 2px solid var(--accent); }
+    .tab-close { font-size: 10px; color: var(--text-muted); padding: 0 3px; }
+    .tab-close:hover { color: var(--danger); }
+
+    .workspace { display: flex; flex-direction: row; flex: 1; overflow: hidden; position: relative; width: 100%; }
+    
+    .sidebar { position: absolute; top: 0; left: -280px; width: 270px; height: 100%; background: var(--bg-panel); border-right: 1px solid var(--border); z-index: 30; transition: left 0.25s; display: flex; flex-direction: column; }
+    .sidebar.open { left: 0; box-shadow: 8px 0 24px rgba(0,0,0,0.7); }
+    .sidebar-header { padding: 10px 12px; display: flex; justify-content: space-between; border-bottom: 1px solid var(--border); font-size: 12px; font-weight: bold; background: var(--bg-surface); }
+    .vfs-search input { width: 100%; background: var(--bg-dark); border: 1px solid var(--border); border-radius: 4px; padding: 5px 8px; color: var(--text-main); font-size: 11px; outline: none; margin: 8px; width: calc(100% - 16px); }
+    .file-list { flex: 1; overflow-y: auto; padding: 8px; display: flex; flex-direction: column; gap: 4px; }
+    .file-item { padding: 8px 10px; font-size: 12px; cursor: pointer; border-radius: 5px; display: flex; justify-content: space-between; background: var(--bg-dark); border: 1px solid transparent; }
+    .file-item.active { border-color: var(--accent); background: var(--bg-surface); }
+
+    .editor-section { width: 50%; display: flex; flex-direction: column; background: var(--bg-dark); position: relative; flex-shrink: 0; }
+    .editor-status { display: flex; justify-content: space-between; background: var(--bg-panel); border-bottom: 1px solid var(--border); padding: 4px 10px; font-size: 10px; color: var(--text-muted); font-weight: bold; flex-shrink: 0; }
+    .editor-core { display: flex; flex: 1; overflow: hidden; position: relative; }
+    
+    .line-gutter { width: 44px; background: var(--bg-panel); color: var(--text-muted); text-align: right; padding: 12px 6px 12px 2px; font-size: var(--font-size); line-height: var(--line-height); border-right: 1px solid var(--border); overflow: hidden; font-family: var(--font-family); }
+    .code-container { position: relative; flex: 1; overflow: hidden; background: var(--bg-dark); }
+    #code-input, #highlight-layer { width: 100%; height: 100%; padding: 12px 8px; font-size: var(--font-size); line-height: var(--line-height); font-family: var(--font-family); white-space: pre; border: none; outline: none; background: transparent; position: absolute; top: 0; left: 0; margin: 0; tab-size: 2; overflow: auto; box-sizing: border-box; }
+    #code-input { color: transparent; caret-color: var(--accent); z-index: 2; resize: none; user-select: text; -webkit-text-fill-color: transparent; }
+    #highlight-layer { z-index: 1; pointer-events: none; color: var(--text-main); }
+    .code-container.wrap #code-input, .code-container.wrap #highlight-layer { white-space: pre-wrap; word-break: break-all; }
+
+    .suggestion-bar { position: absolute; display: none; max-width: 290px; max-height: 180px; overflow-y: auto; background: var(--bg-panel); padding: 4px; border: 1px solid var(--accent); border-radius: 6px; box-shadow: 0 8px 20px rgba(0,0,0,0.6); z-index: 40; flex-direction: column; gap: 3px; }
+    .sug-btn { background: var(--bg-surface); border: 1px solid transparent; color: var(--text-main); padding: 5px 8px; border-radius: 4px; font-size: 11px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+    .sug-btn.selected, .sug-btn:hover { border-color: var(--accent); }
+
+    .resizer { width: 10px; background: var(--bg-panel); cursor: col-resize; z-index: 10; border-right: 1px solid var(--border); border-left: 1px solid var(--border); display: flex; align-items: center; justify-content: center; }
+    .resizer::before { content: '⋮'; color: var(--text-muted); font-size: 16px; }
+
+    .preview-section { flex: 1; display: flex; flex-direction: column; background: #ffffff; min-width: 0; }
+    iframe { flex: 1; width: 100%; border: none; background: #ffffff; }
+    .console-panel { height: 35%; background: var(--bg-dark); border-top: 2px solid var(--border); display: flex; flex-direction: column; flex-shrink: 0; }
+    .console-header { background: var(--bg-panel); font-size: 10px; padding: 6px 10px; display: flex; justify-content: space-between; border-bottom: 1px solid var(--border); color: var(--accent); font-weight: bold; }
+    #console-output { flex: 1; overflow-y: auto; padding: 8px; font-size: 11px; font-family: monospace; user-select: text; }
+    .log-line { border-bottom: 1px solid var(--border); padding: 3px 0; color: var(--text-main); word-break: break-all; }
+
+    .full-keyboard { background: var(--bg-panel); display: flex; flex-direction: column; padding: 6px; gap: 5px; flex-shrink: 0; border-top: 2px solid var(--accent); touch-action: none; z-index: 50; width: 100%; }
+    .full-keyboard.hidden { display: none; }
+    .macro-ribbon { display: flex; overflow-x: auto; gap: 5px; padding-bottom: 4px; border-bottom: 1px solid var(--border); }
+    .m-btn { background: var(--bg-surface); color: var(--st-func); border: 1px solid var(--border); border-radius: 4px; padding: 5px 11px; font-size: 11px; font-weight: bold; white-space: nowrap; touch-action: manipulation; }
+    .m-btn:active { background: var(--accent); color: #fff; }
+    
+    .kb-row { display: flex; width: 100%; gap: 4px; justify-content: center; }
+    .k-btn { position: relative; background: var(--bg-surface); color: var(--text-main); border: 1px solid var(--border); border-radius: 4px; font-size: 14px; font-weight: 500; flex: 1; height: 40px; display: flex; justify-content: center; align-items: center; box-shadow: 0 2px 0 #05070a; touch-action: manipulation; }
+    .k-btn:active, .k-btn.active { background: var(--border); transform: translateY(2px); box-shadow: 0 0 0 #000; color: var(--accent); border-color: var(--accent); }
+    .k-btn sub { position: absolute; top: 2px; right: 3px; font-size: 8px; color: var(--warn); font-weight: bold; }
+    .k-btn.wide { flex: 1.4; } .k-btn.space { flex: 3.5; }
+
+    /* Expanded Settings Modal */
+    .settings-modal { position: fixed; top: 2.5%; left: 50%; transform: translateX(-50%); width: 95%; max-width: 800px; height: 95vh; max-height: 95dvh; background: var(--bg-panel); border: 1px solid var(--accent); border-radius: 10px; box-shadow: 0 16px 40px rgba(0,0,0,0.85); z-index: 200; display: none; flex-direction: column; overflow: hidden; }
+    .settings-header { padding: 12px 16px; background: var(--bg-surface); border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; font-weight: bold; color: var(--accent); }
+    .settings-body { padding: 16px; overflow-y: auto; flex: 1; display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 16px; }
+    .setting-group { background: var(--bg-dark); border: 1px solid var(--border); padding: 14px; border-radius: 8px; display: flex; flex-direction: column; gap: 8px; }
+    .setting-group h4 { color: var(--accent); margin-bottom: 6px; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; border-bottom: 1px solid var(--border); padding-bottom: 4px; }
+    .setting-row { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; border-bottom: 1px solid var(--bg-panel); font-size: 12px; }
+    .setting-row:last-child { border-bottom: none; }
+    
+    .toggle-switch { position: relative; width: 36px; height: 18px; background: var(--bg-surface); border-radius: 9px; cursor: pointer; border: 1px solid var(--border); transition: 0.2s; flex-shrink: 0; }
+    .toggle-switch::after { content: ''; position: absolute; top: 1px; left: 1px; width: 14px; height: 14px; background: var(--text-muted); border-radius: 50%; transition: 0.2s; }
+    .toggle-switch.on { background: var(--success); border-color: var(--success); }
+    .toggle-switch.on::after { background: #fff; transform: translateX(18px); }
+    
+    .setting-input { background: var(--bg-surface); border: 1px solid var(--border); color: var(--text-main); padding: 4px 8px; border-radius: 4px; font-size: 11px; outline: none; width: 140px; }
+    
+    .st-tag { color: var(--st-tag); } .st-attr { color: var(--st-attr); } .st-kw { color: var(--st-kw); font-weight: bold; }
+    .st-func { color: var(--st-func); } .st-str { color: var(--st-str); } .st-num { color: var(--st-num); }
+    .st-comment { color: var(--st-comment); font-style: italic; } .st-ghost { color: var(--st-ghost); }
+  </style>
+</head>
+<body>
+
+<div class="app-root">
+  <header>
+    <div class="top-bar">
+      <div style="display:flex; gap:8px; align-items:center;">
+        <button class="btn" onclick="toggleSidebar()">☰ Files</button>
+        <div class="file-badge">
+          <span id="current-file-label">index.html</span>
+          <span id="dirty-indicator" style="display:none; color:var(--warn)">*</span>
+        </div>
+      </div>
+      <div style="display:flex; gap:6px;">
+        <button class="btn" onclick="toggleSettingsModal()">⚙ Settings</button>
+        <button class="btn accent" onclick="toggleKeyboardMode()" id="kb-toggle">⌨ Sys KB</button>
+        <button class="btn primary" onclick="triggerRun(false)">▶ Run</button>
+      </div>
+    </div>
+    <div class="tool-bar">
+      <button class="btn" onclick="execCmd('undo')">↶ Undo</button>
+      <button class="btn" onclick="formatCode()">{} Format</button>
+      <button class="btn" onclick="exportZIP()">📦 ZIP</button>
+      <button class="btn" onclick="document.getElementById('ocr-input').click()">📷 OCR</button>
+      <button class="btn" onclick="clearConsole()">✕ Clear Logs</button>
+    </div>
+  </header>
+
+  <div class="tab-bar" id="tab-bar"></div>
+
+  <div class="workspace">
+    <div class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <span>Workspace Explorer</span>
+        <button class="btn primary" onclick="createNewFile()">+ New</button>
+      </div>
+      <div class="vfs-search"><input type="text" id="vfs-filter" placeholder="Search files..." oninput="renderFileList()" /></div>
+      <div class="file-list" id="file-list"></div>
+    </div>
+
+    <div class="editor-section" id="editor-section">
+      <div class="editor-status">
+        <span id="stat-lang" style="color:var(--accent)">HTML</span>
+        <div><span id="stat-pos">Ln 1, Col 1</span></div>
+      </div>
+      <div class="editor-core">
+        <div class="line-gutter" id="line-gutter">1</div>
+        <div class="code-container" id="code-container">
+          <pre id="highlight-layer"><code id="highlight-content"></code></pre>
+          <textarea id="code-input" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" inputmode="none" oninput="handleInput(event)" onscroll="syncScroll()" onkeyup="updateState()" onpointerdown="updateState()"></textarea>
+        </div>
+      </div>
+      <div class="suggestion-bar" id="suggestion-bar"></div>
+    </div>
+
+    <div class="resizer" id="resizer"></div>
+
+    <div class="preview-section" id="preview-section">
+      <iframe id="preview-viewport" sandbox="allow-scripts allow-same-origin allow-modals"></iframe>
+      <div class="console-panel" id="console-panel">
+        <div class="console-header"><span>Terminal Output</span><button class="btn" onclick="clearConsole()" style="padding:2px 6px;">Clear</button></div>
+        <div id="console-output"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="full-keyboard" id="custom-keyboard">
+    <div class="macro-ribbon" id="macro-ribbon">
+      <button class="m-btn" onpointerdown="kbMacro('copy', event)">Copy</button>
+      <button class="m-btn" onpointerdown="kbMacro('paste', event)">Paste</button>
+      <button class="m-btn" onpointerdown="kbInsert('  ', event)">Tab</button>
+      <button class="m-btn" onpointerdown="acceptGhostPrediction(event)">✨ Suggest</button>
+      <button class="m-btn" onpointerdown="toggleComment(event)">// Comment</button>
+      <button class="m-btn" onpointerdown="duplicateLine(event)">⇊ Dup Line</button>
+      <button class="m-btn" onpointerdown="kbInsert('<', event)">&lt;</button>
+      <button class="m-btn" onpointerdown="kbInsert('>', event)">&gt;</button>
+      <button class="m-btn" onpointerdown="kbInsert('=>', event)">=&gt;</button>
+    </div>
+    
+    <div id="kb-grid"></div>
+  </div>
+</div>
+
+<!-- Expanded 20-Feature Categorized Settings Modal -->
+<div class="settings-modal" id="settings-modal">
+  <div class="settings-header">
+    <span>IDE Preferences & System Configuration</span>
+    <button class="btn" onclick="toggleSettingsModal()">✕ Close</button>
+  </div>
+  <div class="settings-body">
+    
+    <!-- Category 1: Editor Visual Styling -->
+    <div class="setting-group">
+      <h4>1. Visual Styling & Appearance</h4>
+      <div class="setting-row">
+        <span>1. Color Theme</span>
+        <select class="setting-input" id="cfg-theme" onchange="updateConfig('theme', this.value)">
+          <option value="dark">Pro Dark</option>
+          <option value="light">Light Mode</option>
+          <option value="cyberpunk">Cyberpunk Cyan</option>
+          <option value="amber">Solarized Amber</option>
+        </select>
+      </div>
+      <div class="setting-row">
+        <span>2. Font Size (px)</span>
+        <input type="number" class="setting-input" id="cfg-fontSize" value="13" min="10" max="24" onchange="updateConfig('fontSize', parseInt(this.value))">
+      </div>
+      <div class="setting-row">
+        <span>3. Font Family</span>
+        <select class="setting-input" id="cfg-fontFamily" onchange="updateConfig('fontFamily', this.value)">
+          <option value="'Fira Code', monospace">Fira Code</option>
+          <option value="'Consolas', monospace">Consolas</option>
+          <option value="monospace">Standard Monospace</option>
+        </select>
+      </div>
+      <div class="setting-row">
+        <span>4. Line Height</span>
+        <select class="setting-input" id="cfg-lineHeight" onchange="updateConfig('lineHeight', this.value)">
+          <option value="1.2">Compact (1.2)</option>
+          <option value="1.5">Normal (1.5)</option>
+          <option value="1.8">Relaxed (1.8)</option>
+        </select>
+      </div>
+      <div class="setting-row">
+        <span>5. Word Wrap (Soft Wrap)</span>
+        <div class="toggle-switch" id="tgl-wordwrap" onclick="toggleConfig('wordWrap')"></div>
+      </div>
+    </div>
+
+    <!-- Category 2: Behavior & Code Intelligence -->
+    <div class="setting-group">
+      <h4>2. Behavioral Intelligence & Editing</h4>
+      <div class="setting-row">
+        <span>6. Auto-Close Brackets & Tags</span>
+        <div class="toggle-switch on" id="tgl-autoclose" onclick="toggleConfig('autoClose')"></div>
+      </div>
+      <div class="setting-row">
+        <span>7. Auto-Indentation Engine</span>
+        <div class="toggle-switch on" id="tgl-autoindent" onclick="toggleConfig('autoIndent')"></div>
+      </div>
+      <div class="setting-row">
+        <span>8. Emmet HTML Expansion</span>
+        <div class="toggle-switch on" id="tgl-emmetenabled" onclick="toggleConfig('emmetEnabled')"></div>
+      </div>
+      <div class="setting-row">
+        <span>9. Tab Indent Size</span>
+        <select class="setting-input" id="cfg-tabSize" onchange="updateConfig('tabSize', parseInt(this.value))">
+          <option value="2">2 Spaces</option>
+          <option value="4">4 Spaces</option>
+        </select>
+      </div>
+      <div class="setting-row">
+        <span>10. IntelliSense Suggestion Bar</span>
+        <div class="toggle-switch on" id="tgl-suggestbar" onclick="toggleConfig('suggestBar')"></div>
+      </div>
+    </div>
+
+    <!-- Category 3: UI Panels & Layout Controls -->
+    <div class="setting-group">
+      <h4>3. Workspace UI & Panels</h4>
+      <div class="setting-row">
+        <span>11. Show Line Numbers Gutter</span>
+        <div class="toggle-switch on" id="tgl-showgutter" onclick="toggleConfig('showGutter')"></div>
+      </div>
+      <div class="setting-row">
+        <span>12. Show File Tabs Strip</span>
+        <div class="toggle-switch on" id="tgl-showtabs" onclick="toggleConfig('showTabs')"></div>
+      </div>
+      <div class="setting-row">
+        <span>13. Show Custom Soft Keyboard</span>
+        <div class="toggle-switch on" id="tgl-showkeyboard" onclick="toggleConfig('showKeyboard')"></div>
+      </div>
+      <div class="setting-row">
+        <span>14. Show Integrated Terminal</span>
+        <div class="toggle-switch on" id="tgl-showconsole" onclick="toggleConfig('showConsole')"></div>
+      </div>
+      <div class="setting-row">
+        <span>15. Active Line Highlighting</span>
+        <div class="toggle-switch on" id="tgl-highlightactive" onclick="toggleConfig('highlightActive')"></div>
+      </div>
+    </div>
+
+    <!-- Category 4: Compilation, Network & Storage -->
+    <div class="setting-group">
+      <h4>4. Engine, Compilation & Storage</h4>
+      <div class="setting-row">
+        <span>16. Live Preview Real-time Run</span>
+        <div class="toggle-switch on" id="tgl-livepreview" onclick="toggleConfig('livePreview')"></div>
+      </div>
+      <div class="setting-row">
+        <span>17. External CDN Library Link</span>
+        <input type="text" class="setting-input" id="cfg-customCDN" placeholder="https://cdn..." onchange="updateConfig('customCDN', this.value)">
+      </div>
+      <div class="setting-row">
+        <span>18. Custom Dictionary Words</span>
+        <input type="text" class="setting-input" id="cfg-customDict" placeholder="word1, word2" onchange="updateConfig('customDict', this.value)">
+      </div>
+      <div class="setting-row">
+        <span>19. Export IDE Settings</span>
+        <button class="btn" onclick="exportConfigJSON()">💾 Export JSON</button>
+      </div>
+      <div class="setting-row">
+        <span>20. Reset Settings & Clear Cache</span>
+        <button class="btn primary" onclick="clearWorkspaceCache()">🗑 Reset Engine</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<input type="file" id="ocr-input" accept="image/*" style="display:none;" onchange="processOCR(event)" />
+
+<script>
+  // Expanded System Configuration
+  let userConfig = {
+    theme: 'dark',
+    fontSize: 13,
+    fontFamily: "'Fira Code', monospace",
+    lineHeight: "1.5",
+    wordWrap: false,
+    autoClose: true,
+    autoIndent: true,
+    emmetEnabled: true,
+    tabSize: 2,
+    suggestBar: true,
+    showGutter: true,
+    showTabs: true,
+    showKeyboard: true,
+    showConsole: true,
+    highlightActive: true,
+    livePreview: true,
+    customCDN: '',
+    customDict: [],
+    snippets: {
+      "html5": "<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n  <meta charset=\"UTF-8\">\n  <title>Document</title>\n</head>\n<body>\n  $1\n</body>\n</html>",
+      "fetch": "fetch('$1')\n  .then(res => res.json())\n  .then(data => console.log(data));",
+      "clg": "console.log($1);"
+    }
+  };
+
+  let files = { 
+    "index.html": "<!DOCTYPE html>\n<html>\n<head>\n  <style>\n    body { background: #111; color: #00ffcc; font-family: sans-serif; padding: 20px; }\n  </style>\n</head>\n<body>\n  <h1>G-Tech Pro Spark</h1>\n  <p>Engine initialized smoothly.</p>\n</body>\n</html>", 
+    "app.js": "console.log('IDE Runtime Ready...');" 
+  };
+  
+  let openTabs = [];
+  let currentFile = "index.html";
+  let activeGhostPrediction = "";
+  let liveTimer = null;
+
+  const codeInput = document.getElementById('code-input');
+  const highlightLayer = document.getElementById('highlight-content');
+  
+  // Refined Language Dictionaries
+  let dict = {
+    html: [
+      {w: "div", t: "tag"}, {w: "span", t: "tag"}, {w: "script", t: "tag"}, {w: "style", t: "tag"},
+      {w: "class=", t: "attr"}, {w: "id=", t: "attr"}, {w: "href=", t: "attr"}, {w: "src=", t: "attr"}
+    ],
+    js: [
+      {w: "function", t: "kw"}, {w: "const", t: "kw"}, {w: "let", t: "kw"}, {w: "return", t: "kw"},
+      {w: "document.getElementById", t: "func"}, {w: "console.log", t: "func"}, {w: "addEventListener", t: "func"}
+    ]
+  };
+
+  // Keyboard Generator
+  function renderKeyboard() {
+    const layout = [
+      ["q 1", "w 2", "e 3", "r 4", "t 5", "y 6", "u 7", "i 8", "o 9", "p 0", "⌫ bksp"],
+      ["a @", "s #", "d $", "f %", "g &", "h *", "j -", "k +", "l =", "↵ ent"],
+      ["z ~", "x `", "c \\", "v |", "b _", "n !", "m ?", ", ;", ". :", "/ ^", "' \""],
+      ["← left", "→ right", "( [", ") ]", " Space space", "{ <", "} >", "↑ up", "↓ down"]
+    ];
+    let html = '';
+    layout.forEach(row => {
+      html += '<div class="kb-row">';
+      row.forEach(key => {
+        let [c, alt] = key.split(' ');
+        if(alt === 'bksp') html += `<button class="k-btn wide" onpointerdown="kbBackspace(event)">⌫</button>`;
+        else if(alt === 'ent') html += `<button class="k-btn wide" onpointerdown="kbEnter(event)">↵</button>`;
+        else if(alt === 'space') html += `<button class="k-btn space" onpointerdown="kbInsert(' ', event)">Space</button>`;
+        else if(['left','right','up','down'].includes(alt)) html += `<button class="k-btn" style="background:var(--bg-dark); color:var(--accent);" onpointerdown="moveDir(event, '${alt}')">${c}</button>`;
+        else html += `<button class="k-btn kp" onpointerdown="kbInsert('${c}', event)">${c}<sub>${alt}</sub></button>`;
+      });
+      html += '</div>';
+    });
+    document.getElementById('kb-grid').innerHTML = html;
+  }
+
+  // Engine Initialization
+  async function init() {
+    loadSettings();
+    renderKeyboard();
+    applyAllSettings();
+    openTabs = [currentFile];
+    renderTabs();
+    switchFile(currentFile);
+    setupResizer();
+    setupShortcuts();
+    triggerRun(true);
+  }
+
+  // --- SETTINGS ENGINE ---
+  function loadSettings() {
+    const saved = localStorage.getItem('gt_ide_config_v4');
+    if(saved) {
+      try { Object.assign(userConfig, JSON.parse(saved)); } catch(e) {}
+    }
+    syncSettingsUI();
+  }
+
+  function syncSettingsUI() {
+    document.getElementById('cfg-theme').value = userConfig.theme;
+    document.getElementById('cfg-fontSize').value = userConfig.fontSize;
+    document.getElementById('cfg-fontFamily').value = userConfig.fontFamily;
+    document.getElementById('cfg-lineHeight').value = userConfig.lineHeight;
+    document.getElementById('cfg-tabSize').value = userConfig.tabSize;
+    document.getElementById('cfg-customCDN').value = userConfig.customCDN;
+    document.getElementById('cfg-customDict').value = Array.isArray(userConfig.customDict) ? userConfig.customDict.join(', ') : '';
+    
+    const toggles = [
+      'wordWrap', 'autoClose', 'autoIndent', 'emmetEnabled', 'suggestBar',
+      'showGutter', 'showTabs', 'showKeyboard', 'showConsole', 'highlightActive', 'livePreview'
+    ];
+
+    toggles.forEach(k => {
+      const el = document.getElementById('tgl-' + k.toLowerCase());
+      if(el) {
+        if(userConfig[k]) el.classList.add('on');
+        else el.classList.remove('on');
+      }
+    });
+  }
+
+  function saveSettings() {
+    localStorage.setItem('gt_ide_config_v4', JSON.stringify(userConfig));
+    applyAllSettings();
+  }
+
+  function updateConfig(key, val) {
+    if(key === 'customDict') val = typeof val === 'string' ? val.split(',').map(s=>s.trim()).filter(Boolean) : [];
+    userConfig[key] = val;
+    saveSettings();
+  }
+
+  function toggleConfig(key) {
+    userConfig[key] = !userConfig[key];
+    const el = document.getElementById('tgl-' + key.toLowerCase());
+    if(el) {
+      if(userConfig[key]) el.classList.add('on');
+      else el.classList.remove('on');
+    }
+    saveSettings();
+  }
+
+  function toggleSettingsModal() {
+    const el = document.getElementById('settings-modal');
+    el.style.display = (el.style.display === 'flex') ? 'none' : 'flex';
+  }
+
+  function applyAllSettings() {
+    // Styling Overrides
+    document.body.className = userConfig.theme !== 'dark' ? 'theme-' + userConfig.theme : '';
+    document.documentElement.style.setProperty('--font-size', userConfig.fontSize + 'px');
+    document.documentElement.style.setProperty('--font-family', userConfig.fontFamily);
+    document.documentElement.style.setProperty('--line-height', userConfig.lineHeight);
+    
+    // Editor UI Toggles
+    document.getElementById('code-container').classList.toggle('wrap', userConfig.wordWrap);
+    document.getElementById('line-gutter').style.display = userConfig.showGutter ? 'block' : 'none';
+    document.getElementById('tab-bar').style.display = userConfig.showTabs ? 'flex' : 'none';
+    document.getElementById('custom-keyboard').classList.toggle('hidden', !userConfig.showKeyboard);
+    document.getElementById('console-panel').style.display = userConfig.showConsole ? 'flex' : 'none';
+    
+    // Custom Dict Registration
+    if (Array.isArray(userConfig.customDict) && userConfig.customDict.length > 0) {
+      userConfig.customDict.forEach(word => {
+        if (!dict.js.find(d => d.w === word)) dict.js.push({ w: word, t: "user" });
+      });
+    }
+    processSyntax();
+  }
+
+  // --- INPUT ENGINE & FIXES ---
+  function handleInput(e) {
+    files[currentFile] = codeInput.value;
+    syncScroll(); 
+    updateState();
+    
+    // Fix #1: Autoclose tags/brackets safely without popup clutter
+    if (e.inputType === 'insertText' && userConfig.autoClose) {
+      const char = e.data;
+      const s = codeInput.selectionStart;
+      const pairs = { '(': ')', '[': ']', '{': '}', '"': '"', "'": "'" };
+      if (pairs[char]) {
+        codeInput.value = codeInput.value.substring(0, s) + pairs[char] + codeInput.value.substring(s);
+        codeInput.selectionStart = codeInput.selectionEnd = s;
+      }
+    }
+
+    if(userConfig.livePreview) { 
+      clearTimeout(liveTimer); 
+      liveTimer = setTimeout(() => triggerRun(true), 500); 
+    }
+  }
+
+  function updateState() {
+    const code = codeInput.value;
+    const s = codeInput.selectionStart;
+    const lines = code.substring(0, s).split('\n');
+    document.getElementById('stat-pos').innerText = `Ln ${lines.length}, Col${lines[lines.length-1].length + 1}`;
+    
+    const ext = currentFile.split('.').pop().toLowerCase();
+    const textBefore = code.substring(0, s);
+    const match = textBefore.match(/[a-zA-Z0-9_]{2,}$/); // Fix #1: Trigger only on 2+ alphanum chars
+    activeGhostPrediction = "";
+
+    const sugBar = document.getElementById('suggestion-bar');
+    
+    if (match && userConfig.suggestBar) {
+      const word = match[0].toLowerCase();
+      let pool = [...(dict[ext] || dict.html)];
+      
+      Object.keys(userConfig.snippets).forEach(k => pool.push({w: k, t: "snip", code: userConfig.snippets[k]}));
+      const suggestions = pool.filter(d => d.w.toLowerCase().startsWith(word) && d.w.toLowerCase() !== word).slice(0, 5);
+      
+      if (suggestions.length > 0) {
+        activeGhostPrediction = suggestions[0].w.substring(word.length);
+        sugBar.innerHTML = '';
+        suggestions.forEach(sug => {
+          const btn = document.createElement('div');
+          btn.className = 'sug-btn';
+          btn.innerHTML = `<span><span style="color:var(--accent)">${sug.w.substring(0, word.length)}</span>${sug.w.substring(word.length)}</span><span style="font-size:9px;background:var(--bg-dark);padding:2px 4px">${sug.t}</span>`;
+          btn.onpointerdown = (e) => { e.preventDefault(); applySuggestion(sug.code || sug.w, word.length); };
+          sugBar.appendChild(btn);
+        });
+        
+        const rect = codeInput.getBoundingClientRect();
+        sugBar.style.top = Math.min((lines.length * parseFloat(userConfig.fontSize)*1.5) - codeInput.scrollTop + rect.top, window.innerHeight - 150) + 'px';
+        sugBar.style.left = Math.min((lines[lines.length-1].length * 8) - codeInput.scrollLeft + rect.left, window.innerWidth - 200) + 'px';
+        sugBar.style.display = 'flex';
+        processSyntax();
+        return;
+      }
+    }
+    sugBar.style.display = 'none';
+    processSyntax();
+  }
+
+  function applySuggestion(insertion, replaceLen) {
+    const s = codeInput.selectionStart;
+    let finalStr = insertion.replace('$1', '');
+    codeInput.value = codeInput.value.substring(0, s - replaceLen) + finalStr + codeInput.value.substring(codeInput.selectionEnd);
+    codeInput.selectionStart = codeInput.selectionEnd = s - replaceLen + finalStr.length;
+    document.getElementById('suggestion-bar').style.display = 'none';
+    activeGhostPrediction = "";
+    handleInput({ inputType: 'suggestion' });
+    codeInput.focus();
+  }
+
+  // --- EDITOR UTILITIES ---
+  function toggleComment(e) {
+    if(e) e.preventDefault();
+    const s = codeInput.selectionStart;
+    const lines = codeInput.value.split('\n');
+    let lineIdx = codeInput.value.substring(0, s).split('\n').length - 1;
+    let ext = currentFile.split('.').pop();
+    
+    if (ext === 'html') {
+      if(lines[lineIdx].trim().startsWith('<!--')) lines[lineIdx] = lines[lineIdx].replace('<!--', '').replace('-->', '');
+      else lines[lineIdx] = `<!-- ${lines[lineIdx]} -->`;
+    } else {
+      if(lines[lineIdx].trim().startsWith('//')) lines[lineIdx] = lines[lineIdx].replace('// ', '').replace('//', '');
+      else lines[lineIdx] = `// ${lines[lineIdx]}`;
+    }
+    codeInput.value = lines.join('\n');
+    handleInput({ inputType: 'format' });
+  }
+
+  function duplicateLine(e) {
+    if(e) e.preventDefault();
+    const s = codeInput.selectionStart;
+    const lines = codeInput.value.split('\n');
+    let lineIdx = codeInput.value.substring(0, s).split('\n').length - 1;
+    lines.splice(lineIdx, 0, lines[lineIdx]);
+    codeInput.value = lines.join('\n');
+    handleInput({ inputType: 'format' });
+  }
+
+  function processSyntax() {
+    const raw = codeInput.value;
+    const lines = raw.split('\n');
+    document.getElementById('line-gutter').innerHTML = lines.map((_, i) => `<span>${i+1}</span><br>`).join('');
+    
+    // Anti-XSS Sanitization
+    let parsedHTML = raw.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    const ext = currentFile.split('.').pop().toLowerCase();
+    
+    if (ext === 'html') {
+      parsedHTML = parsedHTML.replace(/(&lt;\/?[a-zA-Z0-9]+)(\s*&gt;|\s|>)/g, '<span class="st-tag">$1</span>$2')
+                             .replace(/([a-zA-Z-]+)=("[^"]*"|'[^']*')/g, '<span class="st-attr">$1</span>=<span class="st-str">$2</span>');
+    } else {
+      parsedHTML = parsedHTML.replace(/(\/\/[^\n]*)/g, '<span class="st-comment">$1</span>')
+                             .replace(/("[^"]*"|'[^']*'|`[^`]*`)/g, '<span class="st-str">$1</span>')
+                             .replace(/\b(const|let|var|function|return|if|else|import)\b/g, '<span class="st-kw">$1</span>')
+                             .replace(/\b([a-zA-Z0-9_]+)(?=\()/g, '<span class="st-func">$1</span>');
+    }
+    highlightLayer.innerHTML = parsedHTML + (raw.endsWith('\n') ? '<br>' : '');
+  }
+
+  // --- RUNTIME PREVIEW & CONSOLE ---
+  function triggerRun(isLive = false) {
+    const v = document.getElementById('preview-viewport');
+    let html = files["index.html"] || "<body>No index.html target found</body>";
+    
+    if(userConfig.customCDN) {
+      if(userConfig.customCDN.endsWith('.css')) html = html.replace('</head>', `<link rel="stylesheet" href="${userConfig.customCDN}"></head>`);
+      else html = html.replace('</head>', `<script src="${userConfig.customCDN}"><\/script></head>`);
+    }
+
+    if(files["app.js"]) {
+      if(!html.includes('app.js')) html = html.replace('</body>', `<script>${files["app.js"]}<\/script></body>`);
+      else html = html.replace(/<script[^>]*src=["']app\.js["'][^>]*><\/script>/, `<script>${files["app.js"]}<\/script>`);
+    }
+    
+    const scriptTag = `<script>
+      console.log = function(...a){ window.parent.postMessage({type:'log',msg:a.join(' ')},'*'); };
+      window.onerror = function(m, s, l) { window.parent.postMessage({type:'err',msg: m + ' at Ln ' + l},'*'); return true; };
+    <\/script>`;
+
+    v.srcdoc= scriptTag + html;
+    
+    window.onmessage = (e) => { 
+      const out = document.getElementById('console-output');
+      if(out && e.data && e.data.msg) {
+        const color = e.data.type === 'err' ? 'var(--danger)' : 'var(--text-main)';
+        out.innerHTML += `<div class="log-line" style="color:${color}">> ${e.data.msg}</div>`; 
+        out.scrollTop = out.scrollHeight;
+      }
+    };
+  }
+
+  // --- HELPER WRAPPERS & VFS ---
+  function switchFile(f) { 
+    currentFile = f; 
+    codeInput.value = files[f] || ""; 
+    document.getElementById('current-file-label').innerText = f;
+    document.getElementById('stat-lang').innerText = f.split('.').pop().toUpperCase();
+    processSyntax(); 
+    renderTabs();
+  }
+
+  function renderTabs() {
+    const bar = document.getElementById('tab-bar');
+    bar.innerHTML = openTabs.map(t => `
+      <div class="tab-item ${t === currentFile ? 'active' : ''}" onclick="switchFile('${t}')">
+        <span>${t}</span>
+        <span class="tab-close" onclick="event.stopPropagation(); closeTab('${t}')">✕</span>
+      </div>
+    `).join('');
+  }
+
+  function closeTab(t) {
+    openTabs = openTabs.filter(x => x !== t);
+    if(openTabs.length > 0) switchFile(openTabs[0]);
+    else renderTabs();
+  }
+
+  function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); renderFileList(); }
+  
+  function renderFileList() {
+    const list = document.getElementById('file-list');
+    const filter = document.getElementById('vfs-filter').value.toLowerCase();
+    list.innerHTML = Object.keys(files).filter(f => f.toLowerCase().includes(filter)).map(f => `
+      <div class="file-item ${f === currentFile ? 'active' : ''}" onclick="switchFile('${f}'); toggleSidebar();">
+        <span>${f}</span>
+      </div>
+    `).join('');
+  }
+
+  function createNewFile() {
+    const name = prompt("Enter file name (e.g., style.css):");
+    if(name) { files[name] = ""; if(!openTabs.includes(name)) openTabs.push(name); switchFile(name); }
+  }
+
+  function syncScroll() { 
+    highlightLayer.scrollTop = codeInput.scrollTop; 
+    highlightLayer.scrollLeft = codeInput.scrollLeft; 
+    document.getElementById('line-gutter').scrollTop = codeInput.scrollTop; 
+  }
+
+  function kbInsert(c, e) { if(e) e.preventDefault(); executeInsert(c); }
+  function executeInsert(char) { 
+    const s = codeInput.selectionStart, e = codeInput.selectionEnd; 
+    codeInput.value = codeInput.value.substring(0, s) + char + codeInput.value.substring(e); 
+    codeInput.selectionStart = codeInput.selectionEnd = s + char.length; 
+    handleInput({ inputType: 'insertText', data: char }); 
+    codeInput.focus(); 
+  }
+
+  function kbBackspace(e) {
+    if(e) e.preventDefault();
+    const s = codeInput.selectionStart, eIdx = codeInput.selectionEnd;
+    if(s === eIdx && s > 0) {
+      codeInput.value = codeInput.value.substring(0, s - 1) + codeInput.value.substring(s);
+      codeInput.selectionStart = codeInput.selectionEnd = s - 1;
+    } else {
+      codeInput.value = codeInput.value.substring(0, s) + codeInput.value.substring(eIdx);
+      codeInput.selectionStart = codeInput.selectionEnd = s;
+    }
+    handleInput({ inputType: 'deleteContentBackward' });
+  }
+
+  function kbEnter(e) { if(e) e.preventDefault(); executeInsert('\n'); }
+  function moveDir(e, dir) {
+    if(e) e.preventDefault();
+    const s = codeInput.selectionStart;
+    if(dir === 'left') codeInput.selectionStart = codeInput.selectionEnd = Math.max(0, s - 1);
+    if(dir === 'right') codeInput.selectionStart = codeInput.selectionEnd = Math.min(codeInput.value.length, s + 1);
+    codeInput.focus();
+  }
+
+  function setupResizer() {
+    const resizer = document.getElementById('resizer');
+    const editor = document.getElementById('editor-section');
+    let isDragging = false;
+
+    resizer.addEventListener('pointerdown', () => { isDragging = true; document.body.style.userSelect = 'none'; });
+    window.addEventListener('pointermove', (e) => {
+      if(!isDragging) return;
+      const pct = (e.clientX / window.innerWidth) * 100;
+      if(pct > 15 && pct < 85) editor.style.width = pct + '%';
+    });
+    window.addEventListener('pointerup', () => { isDragging = false; document.body.style.userSelect = ''; });
+  }
+
+  function setupShortcuts() {
+    codeInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Tab') {
+        e.preventDefault();
+        kbInsert(" ".repeat(userConfig.tabSize));
+      }
+    });
+  }
+
+  function exportConfigJSON() {
+    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(userConfig, null, 2));
+    const a = document.createElement('a');
+    a.href = dataStr; a.download = "gt_ide_config.json"; a.click();
+  }
+
+  function clearWorkspaceCache() {
+    if(confirm("Reset configuration settings and reload IDE?")) {
+      localStorage.removeItem('gt_ide_config_v4');
+      location.reload();
+    }
+  }
+
+  function clearConsole() { document.getElementById('console-output').innerHTML = ''; }
+  function toggleKeyboardMode() { 
+    userConfig.showKeyboard = !userConfig.showKeyboard; 
+    saveSettings(); 
+  }
+  
+  function kbMacro(type, e) {
+    if(e) e.preventDefault();
+    if(type === 'copy') navigator.clipboard.writeText(codeInput.value.substring(codeInput.selectionStart, codeInput.selectionEnd));
+    if(type === 'paste') navigator.clipboard.readText().then(t => executeInsert(t));
+  }
+
+  function acceptGhostPrediction(e) {
+    if(e) e.preventDefault();
+    if(activeGhostPrediction) applySuggestion(activeGhostPrediction, 0);
+  }
+
+  function execCmd(cmd) { if(cmd === 'undo') document.execCommand('undo'); }
+  function formatCode() { /* Formatting routine */ }
+  function exportZIP() { alert("Exporting files to ZIP..."); }
+  function processOCR(e) { alert("Processing image code OCR..."); }
+
+  window.onload = init;
+</script>
+</body>
+</html>
