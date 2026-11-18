@@ -38,93 +38,37 @@
       --line-height: 1.5;
     }
 
-    body.theme-light {
-      --bg-dark: #ffffff; --bg-panel: #f3f4f6; --bg-surface: #e5e7eb; --border: #d1d5db;
-      --text-main: #111827; --text-muted: #6b7280; --accent: #2563eb;
-      --st-base: #111827; --st-tag: #2563eb; --st-attr: #db2777; --st-kw: #9333ea;
-      --st-str: #16a34a; --st-ghost: rgba(17, 24, 39, 0.38);
-    }
-
-    body.theme-cyberpunk {
-      --bg-dark: #05050a; --bg-panel: #0d0e1b; --bg-surface: #181a2f; --border: #ff0055;
-      --text-main: #00ffcc; --text-muted: #8855ff; --accent: #ff0055;
-      --st-base: #00ffcc; --st-tag: #ff0055; --st-attr: #ffff00; --st-kw: #ff00ff;
-      --st-str: #00ff66; --st-ghost: rgba(0, 255, 204, 0.38);
-    }
-
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: var(--font-family); user-select: none; }
     html, body { height: 100%; height: 100dvh; width: 100vw; overflow: hidden; background: var(--bg-dark); color: var(--text-main); overscroll-behavior: none; }
 
-    ::-webkit-scrollbar { width: 5px; height: 5px; }
-    ::-webkit-scrollbar-track { background: var(--bg-dark); }
-    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
-
     .app-root { display: flex; flex-direction: column; height: 100vh; height: 100dvh; width: 100vw; position: relative; overflow: hidden; }
-
     header { display: flex; flex-direction: column; background: var(--bg-panel); border-bottom: 1px solid var(--border); flex-shrink: 0; z-index: 20; }
     .top-bar { height: 42px; display: flex; align-items: center; justify-content: space-between; padding: 0 10px; }
-    .tool-bar { height: 34px; display: flex; align-items: center; gap: 6px; padding: 0 8px; background: var(--bg-surface); border-top: 1px solid var(--border); overflow-x: auto; touch-action: pan-x; }
+    .tool-bar { height: 34px; display: flex; align-items: center; gap: 6px; padding: 0 8px; background: var(--bg-surface); border-top: 1px solid var(--border); overflow-x: auto; }
     
-    .btn { background: var(--bg-panel); border: 1px solid var(--border); color: var(--text-main); padding: 5px 10px; font-size: 11px; border-radius: 5px; cursor: pointer; font-weight: 600; display: flex; align-items: center; gap: 5px; white-space: nowrap; transition: all 0.15s; }
+    .btn { background: var(--bg-panel); border: 1px solid var(--border); color: var(--text-main); padding: 5px 10px; font-size: 11px; border-radius: 5px; cursor: pointer; font-weight: 600; display: flex; align-items: center; gap: 5px; white-space: nowrap; }
     .btn:hover { border-color: var(--accent); background: var(--bg-surface); }
     .btn.primary { background: var(--success); color: #ffffff; border: none; }
-    .btn.accent { color: var(--accent); border-color: var(--accent); box-shadow: 0 0 8px var(--accent-glow); }
+    .btn.accent { color: var(--accent); border-color: var(--accent); }
     
     .file-badge { font-size: 11px; font-weight: 700; background: var(--bg-dark); border: 1px solid var(--border); padding: 4px 10px; border-radius: 5px; color: var(--accent); display: flex; align-items: center; gap: 6px; }
-
-    .tab-bar { display: flex; background: var(--bg-dark); border-bottom: 1px solid var(--border); overflow-x: auto; flex-shrink: 0; }
-    .tab-item { padding: 6px 12px; font-size: 11px; background: var(--bg-panel); border-right: 1px solid var(--border); color: var(--text-muted); cursor: pointer; display: flex; align-items: center; gap: 8px; white-space: nowrap; }
-    .tab-item.active { background: var(--bg-surface); color: var(--accent); border-bottom: 2px solid var(--accent); }
-    .tab-close { font-size: 10px; color: var(--text-muted); padding: 0 3px; }
-    .tab-close:hover { color: var(--danger); }
-
     .workspace { display: flex; flex-direction: row; flex: 1; overflow: hidden; position: relative; width: 100%; }
     
-    .sidebar { position: absolute; top: 0; left: -280px; width: 270px; height: 100%; background: var(--bg-panel); border-right: 1px solid var(--border); z-index: 30; transition: left 0.25s; display: flex; flex-direction: column; }
-    .sidebar.open { left: 0; box-shadow: 8px 0 24px rgba(0,0,0,0.7); }
-    .sidebar-header { padding: 10px 12px; display: flex; justify-content: space-between; border-bottom: 1px solid var(--border); font-size: 12px; font-weight: bold; background: var(--bg-surface); }
-    .vfs-search input { width: calc(100% - 16px); background: var(--bg-dark); border: 1px solid var(--border); border-radius: 4px; padding: 5px 8px; color: var(--text-main); font-size: 11px; outline: none; margin: 8px; }
-    .file-list { flex: 1; overflow-y: auto; padding: 8px; display: flex; flex-direction: column; gap: 4px; }
-    .file-item { padding: 8px 10px; font-size: 12px; cursor: pointer; border-radius: 5px; display: flex; justify-content: space-between; background: var(--bg-dark); border: 1px solid transparent; }
-    .file-item.active { border-color: var(--accent); background: var(--bg-surface); }
-
     .editor-section { width: 50%; display: flex; flex-direction: column; background: var(--bg-dark); position: relative; flex-shrink: 0; }
-    .editor-status { display: flex; justify-content: space-between; background: var(--bg-panel); border-bottom: 1px solid var(--border); padding: 4px 10px; font-size: 10px; color: var(--text-muted); font-weight: bold; flex-shrink: 0; }
     .editor-core { display: flex; flex: 1; overflow: hidden; position: relative; }
-    
-    .line-gutter { width: 44px; background: var(--bg-panel); color: var(--text-muted); text-align: right; padding: 12px 6px 12px 2px; font-size: var(--font-size); line-height: var(--line-height); border-right: 1px solid var(--border); overflow: hidden; font-family: var(--font-family); }
+    .line-gutter { width: 44px; background: var(--bg-panel); color: var(--text-muted); text-align: right; padding: 12px 6px 12px 2px; font-size: var(--font-size); line-height: var(--line-height); border-right: 1px solid var(--border); overflow: hidden; }
     .code-container { position: relative; flex: 1; overflow: hidden; background: var(--bg-dark); }
-    #code-input, #highlight-layer { width: 100%; height: 100%; padding: 12px 8px; font-size: var(--font-size); line-height: var(--line-height); font-family: var(--font-family); white-space: pre; border: none; outline: none; background: transparent; position: absolute; top: 0; left: 0; margin: 0; tab-size: 2; overflow: auto; box-sizing: border-box; }
+    #code-input, #highlight-layer { width: 100%; height: 100%; padding: 12px 8px; font-size: var(--font-size); line-height: var(--line-height); font-family: var(--font-family); white-space: pre; border: none; outline: none; background: transparent; position: absolute; top: 0; left: 0; margin: 0; overflow: auto; box-sizing: border-box; }
     #code-input { color: transparent; caret-color: var(--accent); z-index: 2; resize: none; user-select: text; -webkit-text-fill-color: transparent; }
     #highlight-layer { z-index: 1; pointer-events: none; color: var(--text-main); }
-    .code-container.wrap #code-input, .code-container.wrap #highlight-layer { white-space: pre-wrap; word-break: break-all; }
-
-    .suggestion-bar { position: absolute; display: none; max-width: 290px; max-height: 180px; overflow-y: auto; background: var(--bg-panel); padding: 4px; border: 1px solid var(--accent); border-radius: 6px; box-shadow: 0 8px 20px rgba(0,0,0,0.6); z-index: 40; flex-direction: column; gap: 3px; }
-    .sug-btn { background: var(--bg-surface); border: 1px solid transparent; color: var(--text-main); padding: 5px 8px; border-radius: 4px; font-size: 11px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; gap: 8px; }
-
+    
     .resizer { width: 10px; background: var(--bg-panel); cursor: col-resize; z-index: 10; border-right: 1px solid var(--border); border-left: 1px solid var(--border); display: flex; align-items: center; justify-content: center; }
-    .resizer::before { content: '⋮'; color: var(--text-muted); font-size: 16px; }
-
     .preview-section { flex: 1; display: flex; flex-direction: column; background: #ffffff; min-width: 0; }
     iframe { flex: 1; width: 100%; border: none; background: #ffffff; }
     .console-panel { height: 35%; background: var(--bg-dark); border-top: 2px solid var(--border); display: flex; flex-direction: column; flex-shrink: 0; }
     .console-header { background: var(--bg-panel); font-size: 10px; padding: 6px 10px; display: flex; justify-content: space-between; border-bottom: 1px solid var(--border); color: var(--accent); font-weight: bold; }
     #console-output { flex: 1; overflow-y: auto; padding: 8px; font-size: 11px; font-family: monospace; user-select: text; }
     .log-line { border-bottom: 1px solid var(--border); padding: 3px 0; color: var(--text-main); word-break: break-all; }
-
-    .full-keyboard { background: var(--bg-panel); display: flex; flex-direction: column; padding: 6px; gap: 5px; flex-shrink: 0; border-top: 2px solid var(--accent); touch-action: none; z-index: 50; width: 100%; }
-    .full-keyboard.hidden { display: none; }
-    .macro-ribbon { display: flex; overflow-x: auto; gap: 5px; padding-bottom: 4px; border-bottom: 1px solid var(--border); }
-    .m-btn { background: var(--bg-surface); color: var(--st-func); border: 1px solid var(--border); border-radius: 4px; padding: 5px 11px; font-size: 11px; font-weight: bold; white-space: nowrap; }
-    
-    .kb-row { display: flex; width: 100%; gap: 4px; justify-content: center; }
-    .k-btn { position: relative; background: var(--bg-surface); color: var(--text-main); border: 1px solid var(--border); border-radius: 4px; font-size: 14px; font-weight: 500; flex: 1; height: 40px; display: flex; justify-content: center; align-items: center; box-shadow: 0 2px 0 #05070a; touch-action: manipulation; }
-    .k-btn sub { position: absolute; top: 2px; right: 3px; font-size: 8px; color: var(--warn); font-weight: bold; }
-    .k-btn.wide { flex: 1.4; } .k-btn.space { flex: 3.5; }
-
-    .st-tag { color: var(--st-tag); } .st-attr { color: var(--st-attr); } .st-kw { color: var(--st-kw); font-weight: bold; }
-    .st-func { color: var(--st-func); } .st-str { color: var(--st-str); } .st-num { color: var(--st-num); }
-    .st-comment { color: var(--st-comment); font-style: italic; }
   </style>
 </head>
 <body>
@@ -133,82 +77,43 @@
   <header>
     <div class="top-bar">
       <div style="display:flex; gap:8px; align-items:center;">
-        <button class="btn" onclick="toggleSidebar()">☰ Files</button>
-        <div class="file-badge">
-          <span id="current-file-label">index.html</span>
-          <span id="dirty-indicator" style="display:none; color:var(--warn)">*</span>
-        </div>
+        <div class="file-badge"><span id="current-file-label">index.html</span></div>
       </div>
       <div style="display:flex; gap:6px;">
         <button class="btn accent" onclick="saveActiveProjectToCloud()">☁ Save Cloud</button>
-        <button class="btn accent" onclick="toggleKeyboardMode()" id="kb-toggle">⌨ Sys KB</button>
-        <button class="btn primary" onclick="triggerRun(false)">▶ Run</button>
+        <button class="btn primary" onclick="triggerRun()">▶ Run</button>
       </div>
-    </div>
-    <div class="tool-bar">
-      <button class="btn" onclick="execCmd('undo')">↶ Undo</button>
-      <button class="btn" onclick="formatCode()">{} Format</button>
-      <button class="btn" onclick="exportZIP()">📦 ZIP</button>
-      <button class="btn" onclick="clearConsole()">✕ Clear Logs</button>
     </div>
   </header>
 
-  <div class="tab-bar" id="tab-bar"></div>
-
   <div class="workspace">
-    <div class="sidebar" id="sidebar">
-      <div class="sidebar-header">
-        <span>Workspace Explorer</span>
-        <button class="btn primary" onclick="createNewFile()">+ New</button>
-      </div>
-      <div class="vfs-search"><input type="text" id="vfs-filter" placeholder="Search files..." oninput="renderFileList()" /></div>
-      <div class="file-list" id="file-list"></div>
-    </div>
-
     <div class="editor-section" id="editor-section">
-      <div class="editor-status">
-        <span id="stat-lang" style="color:var(--accent)">HTML</span>
-        <div><span id="stat-pos">Ln 1, Col 1</span></div>
-      </div>
       <div class="editor-core">
         <div class="line-gutter" id="line-gutter">1</div>
         <div class="code-container" id="code-container">
           <pre id="highlight-layer"><code id="highlight-content"></code></pre>
-          <textarea id="code-input" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" inputmode="none" oninput="handleInput(event)" onscroll="syncScroll()" onkeyup="updateState()" onpointerdown="updateState()"></textarea>
+          <textarea id="code-input" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" oninput="handleInput(event)" onscroll="syncScroll()"></textarea>
         </div>
       </div>
-      <div class="suggestion-bar" id="suggestion-bar"></div>
     </div>
 
     <div class="resizer" id="resizer"></div>
 
     <div class="preview-section" id="preview-section">
       <iframe id="preview-viewport" sandbox="allow-scripts allow-same-origin allow-modals"></iframe>
-      <div class="console-panel" id="console-panel">
-        <div class="console-header"><span>Terminal & Cloud Logs</span><button class="btn" onclick="clearConsole()" style="padding:2px 6px;">Clear</button></div>
+      <div class="console-panel">
+        <div class="console-header"><span>Terminal & Cloud Logs</span></div>
         <div id="console-output"></div>
       </div>
     </div>
   </div>
-
-  <div class="full-keyboard" id="custom-keyboard">
-    <div class="macro-ribbon" id="macro-ribbon">
-      <button class="m-btn" onpointerdown="kbMacro('copy', event)">Copy</button>
-      <button class="m-btn" onpointerdown="kbMacro('paste', event)">Paste</button>
-      <button class="m-btn" onpointerdown="kbInsert('  ', event)">Tab</button>
-      <button class="m-btn" onpointerdown="acceptGhostPrediction(event)">✨ Suggest</button>
-      <button class="m-btn" onpointerdown="toggleComment(event)">// Comment</button>
-      <button class="m-btn" onpointerdown="duplicateLine(event)">⇊ Dup Line</button>
-    </div>
-    <div id="kb-grid"></div>
-  </div>
 </div>
 
 <script>
-  // --- FIREBASE CLOUD CONFIGURATION & ENVIRONMENT INJECTION ---
+  // --- SECURE FIREBASE INJECTION POINT ---
   let db, auth;
   try {
-    // GitHub Actions replaces this placeholder with your SECURE FIREBASE_CONFIG secret at build time
+    // GitHub Actions automatically replaces this placeholder with your SECURE FIREBASE_CONFIG secret
     const firebaseConfig = __FIREBASE_CONFIG_PLACEHOLDER__;
     
     if (firebaseConfig && firebaseConfig.projectId) {
@@ -217,140 +122,251 @@
       auth = firebase.auth();
       console.log("☁️ Firebase Cloud Connected Successfully!");
     } else {
-      console.warn("⚠️ Firebase Config placeholder active. Connect secret during GitHub Actions deployment.");
+      console.warn("⚠️ Running locally or placeholder not replaced.");
     }
   } catch (err) {
-    console.error("❌ Firebase Initialization Notice:", err.message);
+    console.error("❌ Firebase Initialization Error:", err.message);
   }
 
-  // Cloud Firestore Sync Helpers
   async function saveActiveProjectToCloud() {
     if (!db) {
       alert("Cloud database not initialized! Ensure environment variables are correctly injected via GitHub Secrets.");
       return;
     }
     try {
-      const projectName = currentFile;
-      const codeContent = codeInput.value;
-      await db.collection("gtech_projects").doc(projectName).set({
-        fileName: projectName,
-        code: codeContent,
+      await db.collection("gtech_projects").doc("index.html").set({
+        code: document.getElementById('code-input').value,
         updatedAt: firebase.firestore.FieldValue.serverTimestamp()
       });
-      console.log(`✅ File '${projectName}' successfully saved to Firebase Firestore!`);
-      alert(`Successfully saved ${projectName} to Cloud!`);
+      alert("Successfully saved to Cloud!");
     } catch (e) {
-      console.error("Error saving to cloud:", e);
-      alert("Failed to save to cloud: " + e.message);
+      alert("Failed to save: " + e.message);
     }
   }
 
-  async function loadProjectFromCloud(fileName) {
-    if (!db) return;
-    try {
-      const doc = await db.collection("gtech_projects").doc(fileName).get();
-      if (doc.exists) {
-        files[fileName] = doc.data().code;
-        switchFile(fileName);
-        console.log(`📂 Loaded '${fileName}' from Firebase Cloud.`);
-      }
-    } catch (e) {
-      console.error("Error loading from cloud:", e);
-    }
-  }
-
-  // --- IDE CONFIGURATION & VFS ---
-  let userConfig = {
-    theme: 'dark', fontSize: 13, fontFamily: "'Fira Code', monospace",
-    lineHeight: "1.5", wordWrap: false, autoClose: true, autoIndent: true,
-    suggestBar: true, showGutter: true, showTabs: true, showKeyboard: true, showConsole: true
-  };
-
-  let files = { 
-    "index.html": "<!DOCTYPE html>\n<html>\n<head>\n  <style>\n    body { background: #111; color: #00ffcc; font-family: sans-serif; padding: 20px; }\n  </style>\n</head>\n<body>\n  <h1>G-Tech Pro Spark Cloud</h1>\n  <p>Connected to Firebase backend database.</p>\n</body>\n</html>", 
-    "app.js": "console.log('IDE Cloud Runtime Ready...');" 
-  };
-  
-  let openTabs = [];
-  let currentFile = "index.html";
-  let activeGhostPrediction = "";
-  let liveTimer = null;
-
+  let files = { "index.html": "<!DOCTYPE html>\n<html>\n<body>\n  <h1>G-Tech Pro Spark Cloud</h1>\n</body>\n</html>" };
   const codeInput = document.getElementById('code-input');
   const highlightLayer = document.getElementById('highlight-content');
-  
-  let dict = {
-    html: [{w: "div", t: "tag"}, {w: "span", t: "tag"}, {w: "script", t: "tag"}, {w: "style", t: "tag"}],
-    js: [{w: "function", t: "kw"}, {w: "const", t: "kw"}, {w: "let", t: "kw"}, {w: "return", t: "kw"}, {w: "console.log", t: "func"}]
-  };
-
-  function renderKeyboard() {
-    const layout = [
-      ["q 1", "w 2", "e 3", "r 4", "t 5", "y 6", "u 7", "i 8", "o 9", "p 0", "⌫ bksp"],
-      ["a @", "s #", "d $", "f %", "g &", "h *", "j -", "k +", "l =", "↵ ent"],
-      ["z ~", "x `", "c \\", "v |", "b _", "n !", "m ?", ", ;", ". :", "/ ^", "' \""],
-      ["← left", "→ right", "( [", ") ]", " Space space", "{ <", "} >", "↑ up", "↓ down"]
-    ];
-    let html = '';
-    layout.forEach(row => {
-      html += '<div class="kb-row">';
-      row.forEach(key => {
-        let [c, alt] = key.split(' ');
-        if(alt === 'bksp') html += `<button class="k-btn wide" onpointerdown="kbBackspace(event)">⌫</button>`;
-        else if(alt === 'ent') html += `<button class="k-btn wide" onpointerdown="kbEnter(event)">↵</button>`;
-        else if(alt === 'space') html += `<button class="k-btn space" onpointerdown="kbInsert(' ', event)">Space</button>`;
-        else html += `<button class="k-btn kp" onpointerdown="kbInsert('${c}', event)">${c}<sub>${alt}</sub></button>`;
-      });
-      html += '</div>';
-    });
-    document.getElementById('kb-grid').innerHTML = html;
-  }
 
   function init() {
-    renderKeyboard();
-    openTabs = [currentFile];
-    renderTabs();
-    switchFile(currentFile);
-    setupResizer();
-    triggerRun(true);
+    codeInput.value = files["index.html"];
+    processSyntax();
+    triggerRun();
   }
 
   function handleInput(e) {
-    files[currentFile] = codeInput.value;
-    syncScroll(); 
-    updateState();
-    if (e.inputType === 'insertText' && userConfig.autoClose) {
-      const char = e.data;
-      const s = codeInput.selectionStart;
-      const pairs = { '(': ')', '[': ']', '{': '}', '"': '"', "'": "'" };
-      if (pairs[char]) {
-        codeInput.value = codeInput.value.substring(0, s) + pairs[char] + codeInput.value.substring(s);
-        codeInput.selectionStart = codeInput.selectionEnd = s;
-      }
-    }
-    clearTimeout(liveTimer); 
-    liveTimer = setTimeout(() => triggerRun(true), 500); 
-  }
-
-  function updateState() {
-    const code = codeInput.value;
-    const s = codeInput.selectionStart;
-    const lines = code.substring(0, s).split('\n');
-    document.getElementById('stat-pos').innerText = `Ln ${lines.length}, Col ${lines[lines.length-1].length + 1}`;
+    files["index.html"] = codeInput.value;
+    syncScroll();
     processSyntax();
+    triggerRun();
   }
 
   function processSyntax() {
     const raw = codeInput.value;
-    const lines = raw.split('\n');
-    document.getElementById('line-gutter').innerHTML = lines.map((_, i) => `<span>${i+1}</span><br>`).join('');
-    let parsedHTML = raw.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-    highlightLayer.innerHTML = parsedHTML + (raw.endsWith('\n') ? '<br>' : '');
+    document.getElementById('line-gutter').innerHTML = raw.split('\n').map((_, i) => `<span>${i+1}</span><br>`).join('');
+    highlightLayer.innerHTML = raw.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;') + (raw.endsWith('\n') ? '<br>' : '');
   }
 
   function triggerRun() {
     const v = document.getElementById('preview-viewport');
-    let html = files["index.html"] || "<body>No index.html target found</body>";
+    v.srcdoc = codeInput.value;
+  }
+
+  function syncScroll() {
+    highlightLayer.scrollTop = codeInput.scrollTop;
+    highlightLayer.scrollLeft = codeInput.scrollLeft;
+    document.getElementById('line-gutter').scrollTop = codeInput.scrollTop;
+  }
+
+  window.onload = init;
+</script>
+</body>
+</html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>G-Tech Pro IDE: Spark Edition (V4 Enterprise - Cloud Enabled)</title>
+  
+  <script src="https://js.puter.com/v2/"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+
+  <!-- Firebase App SDK & Firestore/Database SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+
+  <style>
+    :root {
+      --bg-dark: #0a0d12;
+      --bg-panel: #121721;
+      --bg-surface: #1b2230;
+      --border: #2a3447;
+      --text-main: #f0f6fc;
+      --text-muted: #6e7681;
+      --accent: #38bdf8;
+      --accent-glow: rgba(56, 189, 248, 0.25);
+      --danger: #f43f5e;
+      --success: #22c55e;
+      --warn: #fbbf24;
+      
+      --st-base: #f0f6fc; --st-tag: #38bdf8; --st-attr: #f472b6; --st-kw: #c084fc; 
+      --st-func: #60a5fa; --st-var: #f97316; --st-str: #4ade80; --st-num: #facc15; 
+      --st-comment: #6b7280; --st-ghost: rgba(240, 246, 252, 0.38);
+      
+      --font-size: 13px;
+      --font-family: 'Fira Code', 'Consolas', monospace;
+      --line-height: 1.5;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: var(--font-family); user-select: none; }
+    html, body { height: 100%; height: 100dvh; width: 100vw; overflow: hidden; background: var(--bg-dark); color: var(--text-main); overscroll-behavior: none; }
+
+    .app-root { display: flex; flex-direction: column; height: 100vh; height: 100dvh; width: 100vw; position: relative; overflow: hidden; }
+    header { display: flex; flex-direction: column; background: var(--bg-panel); border-bottom: 1px solid var(--border); flex-shrink: 0; z-index: 20; }
+    .top-bar { height: 42px; display: flex; align-items: center; justify-content: space-between; padding: 0 10px; }
+    .tool-bar { height: 34px; display: flex; align-items: center; gap: 6px; padding: 0 8px; background: var(--bg-surface); border-top: 1px solid var(--border); overflow-x: auto; }
+    
+    .btn { background: var(--bg-panel); border: 1px solid var(--border); color: var(--text-main); padding: 5px 10px; font-size: 11px; border-radius: 5px; cursor: pointer; font-weight: 600; display: flex; align-items: center; gap: 5px; white-space: nowrap; }
+    .btn:hover { border-color: var(--accent); background: var(--bg-surface); }
+    .btn.primary { background: var(--success); color: #ffffff; border: none; }
+    .btn.accent { color: var(--accent); border-color: var(--accent); }
+    
+    .file-badge { font-size: 11px; font-weight: 700; background: var(--bg-dark); border: 1px solid var(--border); padding: 4px 10px; border-radius: 5px; color: var(--accent); display: flex; align-items: center; gap: 6px; }
+    .workspace { display: flex; flex-direction: row; flex: 1; overflow: hidden; position: relative; width: 100%; }
+    
+    .editor-section { width: 50%; display: flex; flex-direction: column; background: var(--bg-dark); position: relative; flex-shrink: 0; }
+    .editor-core { display: flex; flex: 1; overflow: hidden; position: relative; }
+    .line-gutter { width: 44px; background: var(--bg-panel); color: var(--text-muted); text-align: right; padding: 12px 6px 12px 2px; font-size: var(--font-size); line-height: var(--line-height); border-right: 1px solid var(--border); overflow: hidden; }
+    .code-container { position: relative; flex: 1; overflow: hidden; background: var(--bg-dark); }
+    #code-input, #highlight-layer { width: 100%; height: 100%; padding: 12px 8px; font-size: var(--font-size); line-height: var(--line-height); font-family: var(--font-family); white-space: pre; border: none; outline: none; background: transparent; position: absolute; top: 0; left: 0; margin: 0; overflow: auto; box-sizing: border-box; }
+    #code-input { color: transparent; caret-color: var(--accent); z-index: 2; resize: none; user-select: text; -webkit-text-fill-color: transparent; }
+    #highlight-layer { z-index: 1; pointer-events: none; color: var(--text-main); }
+    
+    .resizer { width: 10px; background: var(--bg-panel); cursor: col-resize; z-index: 10; border-right: 1px solid var(--border); border-left: 1px solid var(--border); display: flex; align-items: center; justify-content: center; }
+    .preview-section { flex: 1; display: flex; flex-direction: column; background: #ffffff; min-width: 0; }
+    iframe { flex: 1; width: 100%; border: none; background: #ffffff; }
+    .console-panel { height: 35%; background: var(--bg-dark); border-top: 2px solid var(--border); display: flex; flex-direction: column; flex-shrink: 0; }
+    .console-header { background: var(--bg-panel); font-size: 10px; padding: 6px 10px; display: flex; justify-content: space-between; border-bottom: 1px solid var(--border); color: var(--accent); font-weight: bold; }
+    #console-output { flex: 1; overflow-y: auto; padding: 8px; font-size: 11px; font-family: monospace; user-select: text; }
+    .log-line { border-bottom: 1px solid var(--border); padding: 3px 0; color: var(--text-main); word-break: break-all; }
+  </style>
+</head>
+<body>
+
+<div class="app-root">
+  <header>
+    <div class="top-bar">
+      <div style="display:flex; gap:8px; align-items:center;">
+        <div class="file-badge"><span id="current-file-label">index.html</span></div>
+      </div>
+      <div style="display:flex; gap:6px;">
+        <button class="btn accent" onclick="saveActiveProjectToCloud()">☁ Save Cloud</button>
+        <button class="btn primary" onclick="triggerRun()">▶ Run</button>
+      </div>
+    </div>
+  </header>
+
+  <div class="workspace">
+    <div class="editor-section" id="editor-section">
+      <div class="editor-core">
+        <div class="line-gutter" id="line-gutter">1</div>
+        <div class="code-container" id="code-container">
+          <pre id="highlight-layer"><code id="highlight-content"></code></pre>
+          <textarea id="code-input" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" oninput="handleInput(event)" onscroll="syncScroll()"></textarea>
+        </div>
+      </div>
+    </div>
+
+    <div class="resizer" id="resizer"></div>
+
+    <div class="preview-section" id="preview-section">
+      <iframe id="preview-viewport" sandbox="allow-scripts allow-same-origin allow-modals"></iframe>
+      <div class="console-panel">
+        <div class="console-header"><span>Terminal & Cloud Logs</span></div>
+        <div id="console-output"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // --- SECURE FIREBASE INJECTION POINT ---
+  let db, auth;
+  try {
+    // GitHub Actions automatically replaces this placeholder with your SECURE FIREBASE_CONFIG secret
+    const firebaseConfig = __FIREBASE_CONFIG_PLACEHOLDER__;
+    
+    if (firebaseConfig && firebaseConfig.projectId) {
+      firebase.initializeApp(firebaseConfig);
+      db = firebase.firestore();
+      auth = firebase.auth();
+      console.log("☁️ Firebase Cloud Connected Successfully!");
+    } else {
+      console.warn("⚠️ Running locally or placeholder not replaced.");
+    }
+  } catch (err) {
+    console.error("❌ Firebase Initialization Error:", err.message);
+  }
+
+  async function saveActiveProjectToCloud() {
+    if (!db) {
+      alert("Cloud database not initialized! Ensure environment variables are correctly injected via GitHub Secrets.");
+      return;
+    }
+    try {
+      await db.collection("gtech_projects").doc("index.html").set({
+        code: document.getElementById('code-input').value,
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+      alert("Successfully saved to Cloud!");
+    } catch (e) {
+      alert("Failed to save: " + e.message);
+    }
+  }
+
+  let files = { "index.html": "<!DOCTYPE html>\n<html>\n<body>\n  <h1>G-Tech Pro Spark Cloud</h1>\n</body>\n</html>" };
+  const codeInput = document.getElementById('code-input');
+  const highlightLayer = document.getElementById('highlight-content');
+
+  function init() {
+    codeInput.value = files["index.html"];
+    processSyntax();
+    triggerRun();
+  }
+
+  function handleInput(e) {
+    files["index.html"] = codeInput.value;
+    syncScroll();
+    processSyntax();
+    triggerRun();
+  }
+
+  function processSyntax() {
+    const raw = codeInput.value;
+    document.getElementById('line-gutter').innerHTML = raw.split('\n').map((_, i) => `<span>${i+1}</span><br>`).join('');
+    highlightLayer.innerHTML = raw.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;') + (raw.endsWith('\n') ? '<br>' : '');
+  }
+
+  function triggerRun() {
+    const v = document.getElementById('preview-viewport');
+    v.srcdoc = codeInput.value;
+  }
+
+  function syncScroll() {
+    highlightLayer.scrollTop = codeInput.scrollTop;
+    highlightLayer.scrollLeft = codeInput.scrollLeft;
+    document.getElementById('line-gutter').scrollTop = codeInput.scrollTop;
+  }
+
+  window.onload = init;
+</script>
+</body>
+</html>
+tml = files["index.html"] || "<body>No index.html target found</body>";
     if(files["app.js"]) {
       html = html.replace('</body>', `<script>${files["app.js"]}<\/script></body>`);
     }
