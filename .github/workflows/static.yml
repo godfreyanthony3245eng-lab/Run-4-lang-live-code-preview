@@ -25,7 +25,7 @@ jobs:
   # Single deploy job since we're just deploying
   deploy:
     environment:
-      name: github-pages
+      name: FIREBASE_CONFIG
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
     steps:
@@ -40,10 +40,23 @@ jobs:
         with:
           path: '.'
 
-      # --- INJECT FIREBASE CONFIG SECRET ---
+      # --- INJECT FIREBASE CONFIG SECRET SAFELY ---
       - name: Inject Firebase Config
         run: |
-          sed -i 's/__FIREBASE_CONFIG_PLACEHOLDER__/${{ secrets.FIREBASE_CONFIG }}/g' index.html
+          node -e '
+            const fs = require("fs");
+            let html = fs.readFileSync("index.html", "utf8");
+            const secretConfig = process.env.FIREBASE_CONFIG;
+            if (!secretConfig) {
+              console.error("❌ FIREBASE_CONFIG secret is missing!");
+              process.exit(1);
+            }
+            html = html.replace("__FIREBASE_CONFIG_PLACEHOLDER__", secretConfig);
+            fs.writeFileSync("index.html", html, "utf8");
+            console.log("✅ Firebase config successfully injected into index.html");
+          '
+        env:
+          FIREBASE_CONFIG: ${{ secrets.FIREBASE_CONFIG }}
 
       - name: Deploy to GitHub Pages
         id: deployment
